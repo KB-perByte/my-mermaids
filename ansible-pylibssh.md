@@ -1,6 +1,7 @@
 # pylibssh
 
 ## Build/Test/Lint Commands
+
 - `tox -e lint` - Run all linting checks (flake8, isort, yamllint, pre-commit)
 - `tox` - Run full test suite with coverage in default Python environment
 - `tox -e just-pytest` - Run pytest without coverage or Cython compilation
@@ -9,13 +10,15 @@
 - `tox -e clean` - Clean build artifacts and cached files
 
 ## Architecture
-- **Cython extension**: Core SSH functionality in `src/pylibsshext/` (*.pyx, *.pxd files)
+
+- **Cython extension**: Core SSH functionality in `src/pylibsshext/` (_.pyx, _.pxd files)
 - **Python bindings**: Ansible-specific SSH client for libssh
 - **Custom build backend**: PEP517 backend in `packaging/pep517_backend/`
 - **Tests**: Unit tests in `tests/unit/`, integration tests in `tests/integration/`
 - **Main package**: `src/pylibsshext/` contains the compiled extension module
 
 ## Code Style
+
 - **Line length**: 160 characters (PEP8 unfriendly but accessibility-friendly)
 - **Imports**: Use isort with sections: FUTURE, STDLIB, CYTHON, TESTING, THIRDPARTY, FIRSTPARTY, LOCALFOLDER
 - **Formatting**: Use trailing commas, 4-space indentation, double quotes preferred

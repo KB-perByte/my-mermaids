@@ -10,7 +10,7 @@ graph LR
         E --> C
         E --> D
     end
-    
+
     subgraph "libssh C Library Interface"
         F[libssh.pxd] --> A
         F --> B
@@ -20,7 +20,7 @@ graph LR
         H[callbacks.pxd] --> A
         H --> B
     end
-    
+
     subgraph "Test Coverage"
         I[session_test.py] --> A
         J[channel_test.py] --> B
@@ -30,7 +30,7 @@ graph LR
         O[sshd_test.py] --> A
         O --> B
     end
-    
+
     subgraph "Build Process"
         P[pyproject.toml] --> Q[PEP517 Backend]
         Q --> R[Cython Compilation]
@@ -38,34 +38,34 @@ graph LR
         T[tox.ini] --> U[Test Execution]
         V[pytest.ini] --> U
     end
-    
+
     %% Data Flow
     W[User Code] --> A
     A --> X[SSH Connection]
     X --> Y[Execute Commands]
     Y --> B
     B --> Z[Command Output]
-    
+
     A --> AA[File Transfer]
     AA --> C
     AA --> D
     C --> BB[SFTP Operations]
     D --> CC[SCP Operations]
-    
+
     %% Error Handling
     X -.-> E
     Y -.-> E
     AA -.-> E
     BB -.-> E
     CC -.-> E
-    
+
     %% Styling
     classDef core fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
     classDef clib fill:#fff3e0,stroke:#f57c00,stroke-width:2px
     classDef test fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
     classDef build fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
     classDef flow fill:#fce4ec,stroke:#c2185b,stroke-width:2px
-    
+
     class A,B,C,D,E core
     class F,G,H clib
     class I,J,K,L,M,O test
@@ -79,18 +79,21 @@ graph LR
 
 **Overview:**
 
-- **Core Cython Extensions:**  
+- **Core Cython Extensions:**
+
   - Modules: `session`, `channel`, `sftp`, `scp`, `errors`
   - Provides performant SSH functionality via Cython.
 
-- **Build System:**  
+- **Build System:**
+
   - Custom **PEP517 backend** for Cython compilation and libssh integration.
 
-- **Test Organization:**  
+- **Test Organization:**
+
   - **Unit tests** mirroring source structure.
   - **Integration tests** for end-to-end SSH interactions.
 
-- **Configuration:**  
+- **Configuration:**
   - Extensive linting, formatting, and build configuration for reproducibility and style consistency.
 
 ---
@@ -120,35 +123,42 @@ Session
 
 **Test Layers:**
 
-- **Unit Tests:**  
+- **Unit Tests:**
+
   - Test individual components in isolation with **mocked dependencies**.
 
-- **Integration Tests:**  
+- **Integration Tests:**
+
   - Full interactions with a **live SSH server** or containerized service.
 
-- **Smoke Tests:**  
+- **Smoke Tests:**
+
   - Quick post-build validation to catch obvious breakage.
 
-- **Test Infrastructure:**  
+- **Test Infrastructure:**
   - Shared fixtures, SSH service utilities, test configuration files.
 
 ---
 
 ## 🔑 Key Architecture Insights
 
-- **Cython-Heavy:**  
+- **Cython-Heavy:**
+
   - Core functionality lives in `.pyx` files compiled to C extensions for performance.
 
-- **Modular Design:**  
+- **Modular Design:**
+
   - Clear separation of concerns between SSH operations: session, channel, sftp, scp.
 
-- **Custom Build:**  
+- **Custom Build:**
+
   - Custom **PEP517 backend** handles the multi-stage Cython build with libssh dependencies.
 
-- **Comprehensive Testing:**  
+- **Comprehensive Testing:**
+
   - Each component is covered by unit tests plus real-world integration tests.
 
-- **Quality Assurance:**  
+- **Quality Assurance:**
   - **Linting:** `flake8`, `wemake-python-styleguide`
   - **Formatting:** `isort`, `black`
   - **Automation:** `pre-commit` hooks, coverage reports for reliability.
