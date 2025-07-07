@@ -109,72 +109,158 @@ graph LR
     class DDD,EEE,FFF,GGG,HHH,III,JJJ,KKK,LLL,MMM,NNN,OOO,PPP triggers
     class QQQ,RRR,SSS,TTT,UUU,VVV,WWW,XXX,YYY flow
 ```
-Detailed Build Process Analysis & Key Insights
-I've created three comprehensive diagrams showing the build system's complexity and sophistication:
 
-1. Complete Build Process Flow
-The build system supports three distinct paths:
+# 📦 BUILD.md — Detailed Build Process & Architecture
 
-Development: Editable installs with in-place Cython compilation
-Distribution: Clean source/wheel builds via tox
-CI/CD: Multi-platform wheel building with cibuildwheel
-2. Configuration Dependencies
-Shows the intricate web of configuration files and their relationships, highlighting the sophisticated dependency management.
+## 📈 Complete Build Process Flow
 
-3. Troubleshooting & Debug Flow
-Comprehensive guide for diagnosing and fixing common build issues.
+The build system supports **three distinct workflows**:
 
-🔑 Key Insights
-1. Custom PEP517 Backend Architecture
-packaging/pep517_backend/
-├── hooks.py          # PEP517 entry points
-├── _backend.py       # Core build logic
-├── cli.py            # Cython CLI wrapper
-└── _cython_configuration.py  # Config parser
-Why Custom? Standard setuptools can't handle the complex Cython+libssh dependency chain efficiently.
+1. **Development**
+   - Editable installs with **in-place Cython compilation**
+   - Fast iteration without full rebuilds
 
-2. Multi-Stage Cython Compilation
-.pyx → .c → .so → Python extension
-Stage 1: Cython translates .pyx to .c
-Stage 2: C compiler creates .so shared libraries
-Stage 3: Python imports compiled extensions
-3. Platform-Specific Challenges
-Platform	Challenge	Solution
-Linux	libssh static linking	Custom manylinux containers with pre-built libssh
-macOS	Dynamic library paths	brew install libssh + delocate wheel repair
-Windows	Complex static linking	Currently skipped (too complex)
-4. Build Configuration Hierarchy
+2. **Distribution**
+   - Clean **source and wheel builds** via `tox`
+   - Ensures reproducible artifacts
+
+3. **CI/CD**
+   - **Multi-platform wheel building** using `cibuildwheel`
+   - Custom containers and repair steps for platform-specific quirks
+
+---
+
+## ⚙️ Configuration Dependencies
+
+This project has an **intricate configuration hierarchy**:
+
+```
 pyproject.toml
-├── [build-system]           # PEP517 backend specification
-├── [tool.local.cythonize]   # Custom Cython configuration
-├── [tool.cibuildwheel]      # CI wheel building
-├── [tool.setuptools_scm]    # Version from git tags
-└── [tool.towncrier]         # Changelog generation
-5. Quality Assurance Pipeline
-pre-commit hooks → flake8 + wemake-python-styleguide → pytest → build validation
-6. Performance Optimizations
-Parallel builds: -j auto for multi-core compilation
-In-place development: Avoid full rebuilds during development
-Constraint files: Pin build dependencies for reproducibility
-Container caching: Reuse manylinux containers with pre-built libssh
-7. Debugging Strategies
-Quick Diagnostics:
+├── [build-system]           # PEP517 backend
+├── [tool.local.cythonize]   # Custom Cython build config
+├── [tool.cibuildwheel]      # Cross-platform wheel builds
+├── [tool.setuptools_scm]    # Versioning from git
+└── [tool.towncrier]         # Automated changelogs
+```
 
+> **Key Insight:** Tight integration ensures reproducible builds and consistent versioning.
+
+---
+
+## 🧩 Troubleshooting & Debug Flow
+
+When builds fail, follow this **debug checklist**:
+
+```
 # Check installation
 python -c "import pylibsshext; print(pylibsshext.__version__)"
 
-# Debug build
+# Debug build with verbose output
 tox -e build-dists -v
 
 # Test specific component
 pytest tests/unit/session_test.py::test_make_session -v
-Common Issues:
+```
 
-Missing libssh headers → Install libssh-dev
-Cython compilation errors → Check .pyx syntax
-Import errors → Rebuild extensions with tox -e clean
-8. Advanced Build Features
-Setuptools-scm: Automatic versioning from git tags
-Towncrier: Automated changelog generation
-Custom containers: ghcr.io/ansible/pylibssh-manylinux* with libssh
-Wheel repair: delocate on macOS for dependency bundling
+**Common Issues & Fixes:**
+
+| Problem | Likely Cause | Solution |
+| --- | --- | --- |
+| Missing libssh headers | `libssh-dev` not installed | `sudo apt install libssh-dev` |
+| Cython compilation errors | Syntax errors in `.pyx` | Inspect `.pyx` files, fix errors |
+| Import errors | Stale `.so` files | `tox -e clean` and rebuild |
+
+---
+
+## 🔑 Key Insights
+
+### 1️⃣ Custom PEP517 Backend
+
+**Why?**
+Standard `setuptools` can’t handle the complex **Cython + libssh** dependency chain efficiently.
+
+**Backend Layout:**
+
+```
+packaging/pep517_backend/
+├── hooks.py               # PEP517 entry points
+├── _backend.py            # Core build logic
+├── cli.py                 # Cython CLI wrapper
+└── _cython_configuration.py  # Config parser
+```
+
+---
+
+### 2️⃣ Multi-Stage Cython Compilation
+
+**Workflow:**
+
+```
+.pyx → .c → .so → Python extension
+```
+
+- **Stage 1:** Cython transpiles `.pyx` → `.c`
+- **Stage 2:** C compiler builds `.so` shared libraries
+- **Stage 3:** Python imports compiled `.so`
+
+---
+
+### 3️⃣ Platform-Specific Challenges
+
+| Platform | Challenge | Solution |
+| --- | --- | --- |
+| Linux | Static linking with libssh | Custom manylinux containers with pre-built libssh |
+| macOS | Dynamic library paths | `brew install libssh` + `delocate` for wheel repair |
+| Windows | Complex static linking | Skipped (too complex currently) |
+
+---
+
+### 4️⃣ Quality Assurance Pipeline
+
+End-to-end checks:
+
+```
+pre-commit hooks → flake8 + wemake-python-styleguide → pytest → build validation
+```
+
+---
+
+### 5️⃣ Performance Optimizations
+
+- **Parallel builds:** `-j auto` for multi-core compilation
+- **In-place development:** Editable installs to skip full rebuilds
+- **Constraint files:** Pin build dependencies for reproducibility
+- **Container caching:** Reuse custom manylinux images with libssh pre-built
+
+---
+
+### 6️⃣ Advanced Build Features
+
+- **`setuptools-scm`:** Automatic versioning from git tags
+- **`towncrier`:** Automated changelog generation
+- **Custom containers:** Hosted at `ghcr.io/ansible/pylibssh-manylinux*`
+- **Wheel repair:** `delocate` on macOS to fix dynamic linking
+
+---
+
+## ✅ Recommended Commands
+
+| Task | Command |
+| --- | --- |
+| Clean build | `tox -e clean` |
+| Build dists | `tox -e build-dists` |
+| Run tests | `pytest` |
+| Generate changelog | `towncrier build --yes` |
+
+---
+
+## 📚 References
+
+- [PEP517 Backend Spec](https://www.python.org/dev/peps/pep-0517/)
+- [Cython Docs](https://cython.readthedocs.io/en/latest/)
+- [cibuildwheel](https://cibuildwheel.readthedocs.io/en/stable/)
+- [delocate](https://github.com/matthew-brett/delocate)
+
+---
+
+**Happy Building!** 🚀✨
