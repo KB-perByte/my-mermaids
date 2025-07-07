@@ -180,3 +180,9 @@ graph TD
     class TESTS,UNITS,INTEGRATION,SANITY,TARGETS,CODE_SMELL,UNITS_ANSIBLE,MODULE_TESTS,PLUGIN_TESTS,CORE_TESTS,CLI_TESTS,ANSIBLE_TEST test
     class EXECUTOR,PBE,TQM,TE execution
 ```
+Key Components:
+Entry Points (Blue): CLI tools like ansible, ansible-playbook, ansible-vault
+Core (Purple): Main logic in lib/ansible/ - parsing, playbooks, inventory, variables, templating
+Plugin System (Green): Extensible architecture with connection, action, filter, lookup, and network plugins
+Execution Flow (Pink): PlaybookExecutor → TaskQueueManager → TaskExecutor
+Test Structure (Orange): Unit tests mirror source structure, integration tests validate end-to-end workflows, sanity tests ensure code quality
