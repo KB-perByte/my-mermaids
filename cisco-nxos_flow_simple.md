@@ -1,4 +1,4 @@
-```md
+```mermaid
 graph TB
     subgraph "NetCommon Framework (Referenced)"
         subgraph "NetCommon Base Classes"
